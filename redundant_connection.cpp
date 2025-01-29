@@ -1,0 +1,66 @@
+// My solution (Sub-optimal and not exactly a solution)
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int size = edges.size();
+        vector<bool> visited(size, false);
+        vector<int> result;
+
+        for(int i = 0; i < size; i++){
+            if(!visited[edges[i][0]] || !visited[edges[i][1]]){
+                visited[edges[i][0]] = true;
+                visited[edges[i][1]] = true;
+            }
+            else{
+                result.clear();
+                result.push_back(edges[i][0]);
+                result.push_back(edges[i][1]);
+            }
+        }
+
+        return result;
+    }
+};
+
+
+// Actual solution using unordered maps and adjList
+class ActualSolution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        unordered_map<int, vector<int>> graph;
+
+        auto isConnected = [&](int u, int v) {
+            unordered_set<int> visited;
+            stack<int> stack;
+            stack.push(u);
+
+            while (!stack.empty()) {
+                int node = stack.top();
+                stack.pop();
+
+                if (visited.count(node)) continue;
+                visited.insert(node);
+
+                if (node == v) return true;
+
+                for (int neighbor : graph[node]) {
+                    stack.push(neighbor);
+                }
+            }
+            return false;
+        };
+
+        for (const auto& edge : edges) {
+            int u = edge[0], v = edge[1];
+
+            if (graph.count(u) && graph.count(v) && isConnected(u, v)) {
+                return edge;
+            }
+
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+
+        return {};
+    }
+};
